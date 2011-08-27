@@ -26,6 +26,8 @@ public:
 	void refill();
 	bool isEmpty();
 
+	void selectFirst();
+
 private slots:
 	void selectionChanged(const QItemSelection &current, 
 			const QItemSelection &previous);

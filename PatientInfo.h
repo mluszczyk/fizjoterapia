@@ -1,7 +1,9 @@
 #ifndef FIZJOTERAPIA_PATIENTINFO_H
 #define FIZJOTERAPIA_PATIENTINFO_H
 
+#include <QSize>
 #include <QWidget>
+#include <QPushButton>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -27,11 +29,19 @@ private:
 	QLabel *phone;
 	QLabel *email;
 
+	QPushButton *history;
+	QPushButton *modify;
+
 public:
 	PatientInfo();
 
+	virtual QSize sizeHint() const;
+
 public slots:
 	void change(int);
+
+	void historyClicked();
+	void modifyClicked();
 
 };
 

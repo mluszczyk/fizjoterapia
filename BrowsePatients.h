@@ -3,6 +3,7 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPushButton>
 #include "Decorated.h"
 #include "PatientForm.h"
 #include "PatientList.h"
@@ -19,9 +20,14 @@ private:
 	PatientInfo *pi;
 	QWidget *cont;
 
+	QPushButton *close;
+
 public:
 	BrowsePatients(QWidget* parent=0);
 	void refill();
+
+public slots:
+	void closeClicked();
 
 };
 

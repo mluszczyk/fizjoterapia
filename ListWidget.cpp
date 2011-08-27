@@ -61,4 +61,8 @@ bool ListWidget::isEmpty() {
 	return model->rowCount()==0;
 }
 
+void ListWidget::selectFirst() {
+	view->selectRow(0);
+}
+
 }

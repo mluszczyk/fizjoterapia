@@ -11,6 +11,10 @@ BrowsePatients::BrowsePatients(QWidget *parent)
 	pl = new PatientList;
 	pi = new PatientInfo;
 
+	close = new QPushButton("Zamknij");
+
+	pl->selectFirst();
+
 	layout->addWidget(pl);
 	layout->addWidget(pi);
 
@@ -18,11 +22,18 @@ BrowsePatients::BrowsePatients(QWidget *parent)
 		pi, SLOT(change(int)));
 
 	
+	resize(900, 700);
 	setContent(cont);
+	addControl(close);
+	connect(close, SIGNAL(clicked()), this, SLOT(closeClicked()));
 }
 
 void BrowsePatients::refill() {
 	pl->refill();
+}
+
+void BrowsePatients::closeClicked() {
+	accept();
 }
 
 }

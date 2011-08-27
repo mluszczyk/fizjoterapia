@@ -3,6 +3,7 @@
 
 #include "DB.h"
 #include "PatientInfo.h"
+#include "PatientForm.h"
 
 namespace Fizjoterapia {
 
@@ -31,10 +32,29 @@ PatientInfo::PatientInfo() : patient(-1) {
 	form->addRow(QString::fromUtf8("Zawód:"), job);
 	form->addRow("Telefon:", phone);
 	form->addRow("Email:", email);
+
+	modify = new QPushButton("Modyfikuj dane");
+	history = new QPushButton(QString::fromUtf8("Historia chorób"));
+	control->addWidget(modify);
+	control->addWidget(history);
+	modify->setEnabled(false);
+	history->setEnabled(false);
+
+	connect(modify, SIGNAL(clicked()), this, SLOT(modifyClicked()));
+	connect(history, SIGNAL(clicked()), this, SLOT(historyClicked()));
 }
 
 void PatientInfo::change(int _patient) {
 	patient = _patient;
+
+	if(patient==-1) {
+		modify->setEnabled(false);
+		history->setEnabled(false);
+		return;
+	}
+
+	modify->setEnabled(true);
+	history->setEnabled(true);
 
 	QSqlQuery q = database.getPatient(patient);
 
@@ -46,6 +66,18 @@ void PatientInfo::change(int _patient) {
 	job->setText(q.value(4).toString());
 	phone->setText(q.value(5).toString());
 	email->setText(q.value(6).toString());
+}
+
+QSize PatientInfo::sizeHint() const {
+	return QSize(300, -1);
+}
+
+void PatientInfo::historyClicked() {
+}
+
+void PatientInfo::modifyClicked() {
+	PatientForm form(this, patient);
+	form.exec();
 }
 
 }

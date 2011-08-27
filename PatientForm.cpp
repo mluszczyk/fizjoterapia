@@ -97,7 +97,8 @@ void PatientForm::fillFields() {
 
 	QSqlQuery q = database.getPatient(patient_id);
 
-	if(q.size() != 1) return;  // błąd!
+	if(!q.next()) return;  // błąd!
+	qDebug() << patient_id;
 
 	name->setText(q.value(0).toString());
 	surname->setText(q.value(1).toString());
