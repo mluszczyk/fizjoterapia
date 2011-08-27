@@ -1,33 +1,38 @@
-#ifndef PATIENT_LIST_H
-#define PATIENT_LIST_H
+#ifndef WIDGET_LIST_H
+#define WIDGET_LIST_H
 
 #include <QWidget>
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QModelIndex>
+#include <QSqlQuery>
 
 namespace Fizjoterapia {
 
-class PatientList : public QWidget {
+class ListWidget : public QWidget {
 	Q_OBJECT
 
 protected:
-	int patient;
-	bool wide;
+	int selection;
 
 	QStandardItemModel *model;
 	QTableView *view;
 	QVBoxLayout *layout;
 
 public:
-	PatientList();
+	ListWidget();
 
 	void refill();
+	bool isEmpty();
 
 private slots:
-	void selectedPatient(const QItemSelection &current, 
+	void selectionChanged(const QItemSelection &current, 
 			const QItemSelection &previous);
+
+protected:
+	virtual QSqlQuery buildQuery() = 0;
+	virtual void prepareHeaders() = 0;
 
 signals:
 	void changed(int current);

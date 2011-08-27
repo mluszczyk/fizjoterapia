@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QStackedWidget>
 #include <QLayout>
 #include <QLabel>
 
@@ -16,7 +17,7 @@ protected:
 	QLabel *title;
 	QLabel *subtitle;
 	QVBoxLayout *header;
-	QVBoxLayout *content;
+	QStackedWidget *content;
 	QHBoxLayout *controls;
 	QVBoxLayout *main;
 
@@ -27,7 +28,7 @@ public:
 
 	void setTitle(const QString &title);
 
-	void setContent(QLayout *layout);
+	void setContent(QWidget *layout);
 	void addControl(QWidget* control);
 
 };

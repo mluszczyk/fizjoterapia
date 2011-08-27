@@ -20,6 +20,7 @@ public:
 	QSqlQuery getPatient(int patient_id);
 
 	QSqlQuery listPatients();
+	QSqlQuery listTherapies(int patient=-1);
 
 };
 

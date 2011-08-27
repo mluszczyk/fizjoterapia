@@ -10,7 +10,7 @@ struct Step {
 public:
 
 	QString title;
-	QLayout *content;
+	QWidget *content;
 	bool ready;
 
 public:
@@ -39,8 +39,9 @@ protected slots:
 public:
 	Guide(QDialog *parent=0);
 	void append(const Step& step);
-	void goTo(int step);
 	void setReady(int step, bool ready);
+
+	virtual void goTo(int step);
 };
 
 }

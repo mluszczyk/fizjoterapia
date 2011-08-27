@@ -10,5 +10,5 @@ INCLUDEPATH += .
 QT += sql
 
 # Input
-HEADERS += MainWindow.h PatientForm.h Decorated.h DB.h NewVisit.h Guide.h PatientList.h
-SOURCES += Fizjoterapia.cpp MainWindow.cpp PatientForm.cpp Decorated.cpp DB.cpp NewVisit.cpp Guide.cpp PatientList.cpp
+HEADERS += config.h MainWindow.h PatientForm.h Decorated.h DB.h NewVisit.h Guide.h PatientList.h ListWidget.h TherapyList.h
+SOURCES += Fizjoterapia.cpp MainWindow.cpp PatientForm.cpp Decorated.cpp DB.cpp NewVisit.cpp Guide.cpp PatientList.cpp ListWidget.cpp TherapyList.cpp

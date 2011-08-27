@@ -3,14 +3,14 @@
 #include <QDebug>
 #include <QModelIndex>
 #include <QItemSelection>
-#include "PatientList.h"
+#include "ListWidget.h"
 #include "DB.h"
 
 namespace Fizjoterapia {
 
-PatientList::PatientList() {
+ListWidget::ListWidget() {
 	layout = new QVBoxLayout(this);
-	model = new QStandardItemModel;
+	model = new QStandardItemModel(7, 0);
 	view = new QTableView;
 
 	view->setModel(model);
@@ -23,15 +23,15 @@ PatientList::PatientList() {
 		SIGNAL(selectionChanged(const QItemSelection &,
 			const QItemSelection &)), 
 		this,
-		SLOT(selectedPatient(const QItemSelection &,
+		SLOT(selectionChanged(const QItemSelection &,
 			const QItemSelection &)));
 
 	// Layout
 	layout->addWidget(view, 1);
 }
 
-void PatientList::refill() {
-	QSqlQuery q = database.listPatients();
+void ListWidget::refill() {
+	QSqlQuery q = buildQuery();
 	model->clear();
 
 	while(q.next()) {
@@ -40,9 +40,11 @@ void PatientList::refill() {
 			row.append(new QStandardItem(q.value(i).toString()));
 		model->appendRow(row);
 	}
+
+	prepareHeaders();
 }
 
-void PatientList::selectedPatient(const QItemSelection &current,
+void ListWidget::selectionChanged(const QItemSelection &current,
 		const QItemSelection &previous) {
 	QModelIndexList list = current.indexes();
 	if(list.size()<1) {
@@ -53,6 +55,10 @@ void PatientList::selectedPatient(const QItemSelection &current,
 	int id = model->data(model->index(row, 0)).toInt();
 
 	emit changed(id);
+}
+
+bool ListWidget::isEmpty() {
+	return model->rowCount()==0;
 }
 
 }

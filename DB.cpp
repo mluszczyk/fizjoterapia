@@ -52,4 +52,18 @@ QSqlQuery DB::listPatients() {
 	return q;
 }
 
+QSqlQuery DB::listTherapies(int patient) {
+	QSqlQuery q(Fizjoterapia::database);
+	QString limit = "";
+
+	if(patient!=-1) limit = " WHERE patient_id = ?";
+	q.prepare("SELECT therapy_id, first_visit, last_visit, count "
+		"from view_list_therapies" + limit);
+
+	if(patient!=-1) q.addBindValue(patient);
+	q.exec();
+
+	return q;
+}
+
 }

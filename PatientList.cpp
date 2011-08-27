@@ -8,38 +8,13 @@
 
 namespace Fizjoterapia {
 
-PatientList::PatientList() {
-	layout = new QVBoxLayout(this);
-	model = new QStandardItemModel(7, 0);
-	view = new QTableView;
+PatientList::PatientList() {}
 
-	view->setModel(model);
-	view->setSortingEnabled(true);
-	view->verticalHeader()->hide();
-	view->setSelectionBehavior(QAbstractItemView::SelectRows);
-	view->setSelectionMode(QAbstractItemView::SingleSelection);
-	view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	connect(view->selectionModel(), 
-		SIGNAL(selectionChanged(const QItemSelection &,
-			const QItemSelection &)), 
-		this,
-		SLOT(selectedPatient(const QItemSelection &,
-			const QItemSelection &)));
-
-	// Layout
-	layout->addWidget(view, 1);
+QSqlQuery PatientList::buildQuery() {
+	return database.listPatients();
 }
 
-void PatientList::refill() {
-	QSqlQuery q = database.listPatients();
-	model->clear();
-
-	while(q.next()) {
-		QList<QStandardItem *> row;
-		for(int i=0; i<q.record().count(); ++i)
-			row.append(new QStandardItem(q.value(i).toString()));
-		model->appendRow(row);
-	}
+void PatientList::prepareHeaders() {
 	model->setHeaderData(0, Qt::Horizontal, "ID");
 	model->setHeaderData(1, Qt::Horizontal, QString::fromUtf8("Imię"));
 	model->setHeaderData(2, Qt::Horizontal, "Nazwisko");
@@ -50,19 +25,6 @@ void PatientList::refill() {
 
 	view->setColumnHidden(0, true);
 	view->resizeColumnsToContents();
-}
-
-void PatientList::selectedPatient(const QItemSelection &current,
-		const QItemSelection &previous) {
-	QModelIndexList list = current.indexes();
-	if(list.size()<1) {
-		emit changed(-1);
-		return;
-	}
-	int row = list[0].row();
-	int id = model->data(model->index(row, 0)).toInt();
-
-	emit changed(id);
 }
 
 }

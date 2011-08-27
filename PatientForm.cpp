@@ -7,8 +7,10 @@ namespace Fizjoterapia {
 
 PatientForm::PatientForm(QWidget *parent, int _patient_id)
 	: Decorated(parent), patient_id(_patient_id), last_added_row(-1) {
+
+	wrap = new QWidget;
 	
-	form = new QFormLayout;
+	form = new QFormLayout(wrap);
 	name = new QLineEdit;
 	surname = new QLineEdit;
 	birth = new QDateEdit;
@@ -27,16 +29,16 @@ PatientForm::PatientForm(QWidget *parent, int _patient_id)
 
 	sex_male->setDown(true);
 
-	form->addRow(QString::fromUtf8("Imię"), name);
-	form->addRow("Nazwisko", surname);
-	form->addRow("Data urodzenia", birth);
-	form->addRow(QString::fromUtf8("Płeć"), sex_layout);
-	form->addRow("Telefon", phone);
-	form->addRow(QString::fromUtf8("Zawód"), job);
-	form->addRow("Email", email);
+	form->addRow(QString::fromUtf8("Imię:"), name);
+	form->addRow("Nazwisko:", surname);
+	form->addRow("Data urodzenia:", birth);
+	form->addRow(QString::fromUtf8("Płeć:"), sex_layout);
+	form->addRow("Telefon:", phone);
+	form->addRow(QString::fromUtf8("Zawód:"), job);
+	form->addRow("Email:", email);
 
 	fillFields();
-	setContent(form);
+	setContent(wrap);
 	setModal(false);
 
 	if(patient_id) setTitle("Modyfikacja danych pacjenta");

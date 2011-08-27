@@ -20,6 +20,7 @@ private:
 	int last_added_row;
 	QFormLayout *form;
 
+	QWidget *wrap;
 	QLineEdit *name;
 	QLineEdit *surname;
 	QDateEdit *birth;

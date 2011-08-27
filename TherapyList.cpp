@@ -8,51 +8,25 @@
 
 namespace Fizjoterapia {
 
-PatientList::PatientList() {
-	layout = new QVBoxLayout(this);
-	model = new QStandardItemModel;
-	view = new QTableView;
+TherapyList::TherapyList() : patient(0) {}
 
-	view->setModel(model);
-	view->setSortingEnabled(true);
-	view->verticalHeader()->hide();
-	view->setSelectionBehavior(QAbstractItemView::SelectRows);
-	view->setSelectionMode(QAbstractItemView::SingleSelection);
-	view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	connect(view->selectionModel(), 
-		SIGNAL(selectionChanged(const QItemSelection &,
-			const QItemSelection &)), 
-		this,
-		SLOT(selectedPatient(const QItemSelection &,
-			const QItemSelection &)));
-
-	// Layout
-	layout->addWidget(view, 1);
+QSqlQuery TherapyList::buildQuery() {
+	return database.listTherapies(patient);
 }
 
-void PatientList::refill() {
-	QSqlQuery q = database.listPatients();
-	model->clear();
-
-	while(q.next()) {
-		QList<QStandardItem *> row;
-		for(int i=0; i<q.record().count(); ++i)
-			row.append(new QStandardItem(q.value(i).toString()));
-		model->appendRow(row);
-	}
+void TherapyList::setPatient(int _patient) {
+	patient = _patient;
 }
 
-void PatientList::selectedPatient(const QItemSelection &current,
-		const QItemSelection &previous) {
-	QModelIndexList list = current.indexes();
-	if(list.size()<1) {
-		emit changed(-1);
-		return;
-	}
-	int row = list[0].row();
-	int id = model->data(model->index(row, 0)).toInt();
+void TherapyList::prepareHeaders() {
+	model->setHeaderData(0, Qt::Horizontal, "ID");
+	model->setHeaderData(1, Qt::Horizontal, "Pierwsza wizyta");
+	model->setHeaderData(2, Qt::Horizontal, "Ostatnia wizyta");
+	model->setHeaderData(3, Qt::Horizontal, 
+			QString::fromUtf8("Ilość wizyt"));
 
-	emit changed(id);
+	view->setColumnHidden(0, true);
+	view->resizeColumnsToContents();
 }
 
 }

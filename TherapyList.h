@@ -1,37 +1,24 @@
-#ifndef PATIENT_LIST_H
-#define PATIENT_LIST_H
+#ifndef THERAPY_LIST_H
+#define THERAPY_LIST_H
 
 #include <QWidget>
-#include <QStandardItemModel>
-#include <QTableView>
-#include <QVBoxLayout>
-#include <QModelIndex>
+#include "ListWidget.h"
 
 namespace Fizjoterapia {
 
-class PatientList : public QWidget {
+class TherapyList : public ListWidget {
 	Q_OBJECT
 
 protected:
 	int patient;
-	bool wide;
-
-	QStandardItemModel *model;
-	QTableView *view;
-	QVBoxLayout *layout;
 
 public:
-	PatientList();
+	TherapyList();
+	void setPatient(int _patient);
 
-	void refill();
-
-private slots:
-	void selectedTherapy(const QItemSelection &current, 
-			const QItemSelection &previous);
-
-signals:
-	void changed(int current);
-
+protected:
+	QSqlQuery buildQuery();
+	void prepareHeaders();
 	
 };
 

@@ -15,9 +15,9 @@ Guide::Guide(QDialog *parent) : Decorated(parent), current(-1) {
 	cancel = new QPushButton("Przerwij");
 	finish = new QPushButton(QString::fromUtf8("Zakończ"));
 
-	controls->addWidget(next);
-	controls->addWidget(prev);
 	controls->addWidget(cancel);
+	controls->addWidget(prev);
+	controls->addWidget(next);
 	controls->addWidget(finish);
 
 	connect(next, SIGNAL(clicked()), this, SLOT(clickedNext()));
@@ -30,6 +30,10 @@ void Guide::append(const Step& step) {
 	steps.append(step);
 	if(current == -1) {
 		goTo(0);
+	} else if(steps.size()==2) {
+		finish->setVisible(false);
+		cancel->setVisible(true);
+		next->setVisible(true);
 	}
 }
 
@@ -60,6 +64,8 @@ void Guide::goTo(int step) {
 	cancel->setVisible(step<steps.count()-1);
 	finish->setVisible(step==steps.count()-1);
 
+	next->setEnabled(steps[step].ready);
+
 	setTitle(steps[step].title);
 
 	steps[current].displayed();
@@ -68,12 +74,8 @@ void Guide::goTo(int step) {
 void Guide::setReady(int step, bool ready) {
 	steps[step].ready = ready;
 	if(step == current) {
-		if(ready && step<steps.count()-1)
-			next->setVisible(true);
-		if(!ready)
-			next->setVisible(false);
+		next->setEnabled(ready);
 	}
 }
-
 
 }

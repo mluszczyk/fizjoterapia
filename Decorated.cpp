@@ -6,7 +6,7 @@ namespace Fizjoterapia {
 Decorated::Decorated(QWidget *parent, const QString &_title) : QDialog(parent) {
 	main = new QVBoxLayout(this);
 	header = new QVBoxLayout();
-	content = new QVBoxLayout();
+	content = new QStackedWidget();
 	controls = new QHBoxLayout();
 
 	current_content = 0;
@@ -17,7 +17,7 @@ Decorated::Decorated(QWidget *parent, const QString &_title) : QDialog(parent) {
 	header->addWidget(title);
 
 	main->addLayout(header);
-	main->addLayout(content);
+	main->addWidget(content);
 	main->addLayout(controls);
 
 	controls->setAlignment(Qt::AlignRight);
@@ -27,13 +27,16 @@ Decorated::Decorated(QWidget *parent, const QString &_title) : QDialog(parent) {
 
 void Decorated::setTitle(const QString &_title) {
 	setWindowTitle(_title);
-	title->setText("<span style=\"font-size: xx-large; font-weight: bold\">"+_title+"</span>");
+	title->setText("<span style=\"font-size: xx-large; "
+			"font-weight: bold\">"+_title+"</span>");
 }
 
-void Decorated::setContent(QLayout *layout) {
-	if(current_content) content->removeItem(current_content);
-	current_content = layout;
-	content->addLayout(layout);
+void Decorated::setContent(QWidget *widget) {
+	int index = content->indexOf(widget);
+	if(index==-1) {
+		index = content->addWidget(widget);
+	}
+	content->setCurrentIndex(index);
 }
 
 void Decorated::addControl(QWidget *widget) {

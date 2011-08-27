@@ -1,1 +1,5 @@
-db*
+db.*
+.*\.o
+moc_.*\.cpp
+fizjoterapia
+Makefile
