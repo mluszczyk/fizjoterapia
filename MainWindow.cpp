@@ -1,6 +1,9 @@
+#include <QDebug>
+
 #include "PatientForm.h"
 #include "NewVisit.h"
 #include "MainWindow.h"
+#include "BrowsePatients.h"
 #include "DB.h"
 
 namespace Fizjoterapia {
@@ -10,26 +13,35 @@ MainWindow::MainWindow() {
 
 	setWindowTitle("Fizjoterapia");
 
-	createButton("Nowa wizyta", "Rozpocznij tworzenie nowej wizyty", 
-			SLOT(clickedNewVisit()));
-	createButton("Pacjenci i choroby", "Przeglądaj pacjentów i historię chorób", 
-			SLOT(clickedHistory()));
-	createButton("Dodaj pacjenta", "Dodaj nowego pacjenta do bazy", 
-			SLOT(clickedNewPatient()));
+	createButton("Nowa wizyta",
+		"Rozpocznij tworzenie nowej wizyty", 
+		SLOT(clickedNewVisit()));
+	createButton("Pacjenci i choroby",
+		"Przeglądaj pacjentów i historię chorób", 
+		SLOT(clickedHistory()));
+	createButton("Dodaj pacjenta",
+		"Dodaj nowego pacjenta do bazy", 
+		SLOT(clickedNewPatient()));
 }
 
-void MainWindow::createButton(const QString &title, const QString &desc, const char slot[]) {
+void MainWindow::createButton(const QString &title, const QString &, 
+		const char slot[]) {
 	QPushButton *button = new QPushButton(title, this);
 	connect(button, SIGNAL(clicked()), this, slot);
 	mainLayout->addWidget(button);
 }
 
 void MainWindow::clickedNewVisit() {
-    NewVisit nw(this);
-    nw.exec();
+	NewVisit nw(this);
+	nw.exec();
 }
 
-void MainWindow::clickedHistory() {}
+void MainWindow::clickedHistory() {
+	BrowsePatients bp(this);
+	bp.refill();
+	bp.exec();
+}
+
 void MainWindow::clickedNewPatient() {
 	PatientForm pf(this);
 	pf.exec();

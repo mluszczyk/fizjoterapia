@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QWidget>
 #include <QSize>
+#include <QHeaderView>
 
 #include "config.h"
 #include "NewVisit.h"
@@ -64,6 +65,7 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 	control_view = new QListView;
 	control_add = new QPushButton("Dodaj");
 	control_del = new QPushButton(QString::fromUtf8("Usuń"));
+	control_edit = new QPushButton(QString::fromUtf8("Edytuj"));
 	control_buttons = new QHBoxLayout;
 
 	interview->setTabChangesFocus(true);
@@ -75,6 +77,19 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 	control_buttons->addWidget(control_del);
 	connect(control_del, SIGNAL(clicked()), this,
 			SLOT(controlDelClicked()));
+	control_buttons->addWidget(control_edit);
+	connect(control_edit, SIGNAL(clicked()), this,
+			SLOT(controlEditClicked()));
+
+	connect(control, SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+		this, SLOT(controlDcr(const QModelIndex &, int, int)));
+	connect(control, SIGNAL(rowsInserted(const QModelIndex &, int, int)),
+		this, SLOT(controlInc(const QModelIndex &, int, int)));
+	connect(control, 
+		SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+		this,
+		SLOT(controlCh(const QModelIndex &, const QModelIndex &)));
+
 
 	lay3->addWidget(interview_label, 0, 0);
 	lay3->addWidget(interview, 1, 0);
@@ -92,23 +107,58 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 	wid4 = new QWidget;
 	treat_buttons_wrap = new QWidget;
 	lay4 = new QVBoxLayout(wid4);
-	treat_buttons = new QHBoxLayout(treat_buttons_wrap);
+	treat_buttons = new QHBoxLayout;//(treat_buttons_wrap);
 	treat = new QStandardItemModel;
 	treat_view = new QTableView;
 	treat_del = new QPushButton(QString::fromUtf8("Usuń"));
 	treat_add = new QPushButton("Dodaj");
+	treat_edit = new QPushButton("Edytuj");
+
+	treat_view->setModel(treat);
+	QList<QStandardItem *> list;
+	treat->appendColumn(list);
+	treat->setHeaderData(0, Qt::Horizontal, "Rodzaj zabiegu"); 
 
 	treat_buttons->addWidget(treat_add);
 	treat_buttons->addWidget(treat_del);
+	treat_buttons->addWidget(treat_edit);
+
+	connect(treat_add, SIGNAL(clicked()), this, 
+			SLOT(treatAddClicked()));
+	connect(treat_del, SIGNAL(clicked()), this,
+			SLOT(treatDelClicked()));
+	connect(treat_edit, SIGNAL(clicked()), this,
+			SLOT(treatEditClicked()));
+
+	treat_view->verticalHeader()->hide();
+	treat_view->setSelectionBehavior(QAbstractItemView::SelectRows);
+	treat_view->setSelectionMode(QAbstractItemView::SingleSelection);
 	
 	lay4->addWidget(treat_view, 1);
-	lay4->addWidget(treat_buttons_wrap, 0, Qt::AlignCenter);
+	lay4->addLayout(treat_buttons);
+	lay4->setAlignment(treat_buttons, Qt::AlignCenter);
 
 	Step step4 = {QString::fromUtf8("Zabiegi"), wid4, true};
 	append(step4);
 
+	// Step 5 - confirm
+	confirm_label = new QLabel(QString::fromUtf8(
+		"<b>Tworzenie wizyty zakończone!</b><br/><br/>Kliknij "
+		"Dalej aby zatwierdzić wizytę i zapisać ją w bazie. "
+		"Możesz też wrócić się klikając Wstecz, aby poprawić "
+		"wprowadzone dane lub wybrać Przerwij, aby "
+		"zrezygnować z tworzonej wizyty."));
+	confirm_label->setWordWrap(true);
+
+	Step step5 = {QString::fromUtf8("Potwierdzenie wizyty"), 
+		confirm_label, true};
+	append(step5);
+
 	// Last step
-	label_last = new QLabel("Gratulacje");
+	label_last = new QLabel(QString::fromUtf8("<b>Gratulacje! Wizyta "
+		"została zapisana!</b><br/><br/> "
+		"Możesz już bezpiecznie zamknąć to okno. "
+		"Możesz też wybrać jedną z poniższych opcji:"));
 
 	Step step_last = {QString::fromUtf8("Wizyta zapisana"), label_last,
 		false};
@@ -168,5 +218,55 @@ void NewVisit::controlDelClicked() {
 	int row = list[0].row();
 	control->removeRows(row, 1);
 }
+
+void NewVisit::controlEditClicked() {
+	QModelIndexList list = control_view->selectionModel()->selectedRows();
+	if(list.size()==0) return;
+
+	int row = list[0].row();
+	control_view->edit(control->index(row));
+}
+
+void NewVisit::treatAddClicked() {
+	QStandardItem *item = new QStandardItem;
+	treat->appendRow(item);
+	
+	int row = treat->rowCount()-1;
+	treat_view->edit(treat->index(row, 0));
+}
+
+void NewVisit::treatDelClicked() {
+	QModelIndexList list = treat_view->selectionModel()->selectedRows();
+	if(list.size()==0) return;
+
+	int row = list[0].row();
+	treat->removeRow(row);
+}
+
+void NewVisit::treatEditClicked() {
+	QModelIndexList list = treat_view->selectionModel()->selectedRows();
+	if(list.size()==0) return;
+
+	int row = list[0].row();
+	treat_view->edit(treat->index(row, 0));
+}
+
+
+void NewVisit::controlInc(const QModelIndex &, int, int) {
+	QList<QStandardItem *> list;
+	treat->appendColumn(list);
+}
+
+void NewVisit::controlDcr(const QModelIndex &, int start, int) {
+	treat->removeColumn(start+1);
+}
+
+void NewVisit::controlCh(const QModelIndex &tl, const QModelIndex &) {
+	int row = tl.row();
+	QString label = tl.data().toString();
+	treat->setHeaderData(row+1, Qt::Horizontal, label);
+}
+
+
 
 }

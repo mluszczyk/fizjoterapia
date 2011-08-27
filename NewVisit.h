@@ -46,6 +46,7 @@ private:
 	QHBoxLayout *control_buttons;
 	QPushButton *control_add;
 	QPushButton *control_del;
+	QPushButton *control_edit;
 	QWidget *wid3;
 
 	QVBoxLayout *lay4;
@@ -55,7 +56,10 @@ private:
 	QTableView *treat_view;
 	QPushButton *treat_add;
 	QPushButton *treat_del;
+	QPushButton *treat_edit;
 	QWidget *wid4;
+
+	QLabel *confirm_label;
 
 	QLabel *label_last;
 
@@ -72,6 +76,14 @@ private slots:
 
 	void controlDelClicked();
 	void controlAddClicked();
+	void controlEditClicked();
+	void controlInc(const QModelIndex &, int, int);
+	void controlDcr(const QModelIndex &, int, int);
+	void controlCh(const QModelIndex &, const QModelIndex &); 
+
+	void treatDelClicked();
+	void treatAddClicked();
+	void treatEditClicked();
 
 };
 

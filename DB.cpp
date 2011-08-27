@@ -34,19 +34,20 @@ bool DB::addPatient(const QString &name, const QString &surname,
 
 QSqlQuery DB::getPatient(int patient_id) {
 	QSqlQuery q(Fizjoterapia::database);
-	q.prepare("SELECT name, surname, birth, sex, phone, job, email "
-		"FROM patient WHERE id = ?");
+	q.prepare("SELECT name, surname, birth, sex, job, phone, email "
+		"FROM patient WHERE rowid = ?");
 	q.addBindValue(patient_id);
 
 	q.exec();
+	q.next();
 
 	return q;
 }
 
 QSqlQuery DB::listPatients() {
 	QSqlQuery q(Fizjoterapia::database);
-	q.prepare("SELECT patient_id, name, surname, sex, birth, first_visit, "
-		"last_visit from view_list_patients");
+	q.prepare("SELECT patient_id, name, surname, sex, birth, "
+		"first_visit, last_visit from view_list_patients");
 	q.exec();
 
 	return q;
