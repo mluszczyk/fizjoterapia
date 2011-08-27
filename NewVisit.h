@@ -9,6 +9,7 @@
 #include <QTextEdit>
 #include <QListView>
 #include <QStringListModel>
+#include <QCloseEvent>
 
 #include "Guide.h"
 #include "PatientList.h"
@@ -59,16 +60,29 @@ private:
 	QPushButton *treat_edit;
 	QWidget *wid4;
 
+	QVBoxLayout *lay5;
+	QLabel *auto_label;
+	QTextEdit *autotherapy;
+	QWidget *wid5;
+
 	QLabel *confirm_label;
 
 	QLabel *label_last;
 
 	int patient_id;
+	int therapy_id;
+	int visit_id;
+
+	bool success;
 
 public:
 	NewVisit(QDialog *parent);
 
 	virtual void goTo(int step);
+	virtual void exec();
+
+private:
+	int toDb();
 
 private slots:
 	void patientChanged(int id);
@@ -84,6 +98,11 @@ private slots:
 	void treatDelClicked();
 	void treatAddClicked();
 	void treatEditClicked();
+
+	virtual void reject();
+
+	void newPatientClicked();
+	void newTherapyClicked();
 
 };
 

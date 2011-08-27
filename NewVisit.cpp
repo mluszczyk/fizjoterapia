@@ -3,13 +3,17 @@
 #include <QWidget>
 #include <QSize>
 #include <QHeaderView>
+#include <QSqlError>
 
 #include "config.h"
+#include "DB.h"
 #include "NewVisit.h"
+#include "PatientForm.h"
 
 namespace Fizjoterapia {
 
-NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
+NewVisit::NewVisit(QDialog *parent) : Guide(parent), 
+	patient_id(-1), therapy_id(-1), visit_id(-1), success(false) {
 	resize(QSize(700, 500));
 
 	// Step 0
@@ -22,6 +26,8 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 
 	connect(patientList, SIGNAL(changed(int)),
 			this, SLOT(patientChanged(int)));
+	connect(newPatient, SIGNAL(clicked()),
+			this, SLOT(newPatientClicked()));
 	
 	Step step0 = {"Wybierz pacjenta", wid0, false};
 	append(step0);
@@ -36,6 +42,8 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 
 	connect(therapyList, SIGNAL(changed(int)),
 			this, SLOT(therapyChanged(int)));
+	connect(newTherapy, SIGNAL(clicked()),
+			this, SLOT(newTherapyClicked()));
 	
 	Step step1 = {QString::fromUtf8("Wybierz terapię"), wid1, false};
 	append(step1);
@@ -141,18 +149,32 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 	Step step4 = {QString::fromUtf8("Zabiegi"), wid4, true};
 	append(step4);
 
-	// Step 5 - confirm
+	// Step 5
+	wid5 = new QWidget;
+	lay5 = new QVBoxLayout(wid5);
+	auto_label = new QLabel("Autoterapia");
+	autotherapy = new QTextEdit;
+
+	autotherapy->setTabChangesFocus(true);
+	lay5->addWidget(auto_label);
+	lay5->addWidget(autotherapy);
+	
+	Step step5 = {"Autoterapia", wid5, true};	
+	append(step5);
+
+	// Step 6 - confirm
 	confirm_label = new QLabel(QString::fromUtf8(
 		"<b>Tworzenie wizyty zakończone!</b><br/><br/>Kliknij "
-		"Dalej aby zatwierdzić wizytę i zapisać ją w bazie. "
-		"Możesz też wrócić się klikając Wstecz, aby poprawić "
-		"wprowadzone dane lub wybrać Przerwij, aby "
+		"<i>Dalej</i> aby zatwierdzić wizytę i zapisać ją w bazie. "
+		"Możesz też wrócić się, aby poprawić "
+		"wprowadzone dane klikając <i>Wstecz</i> "
+		"lub wybrać <i>Przerwij</i>, aby "
 		"zrezygnować z tworzonej wizyty."));
 	confirm_label->setWordWrap(true);
 
-	Step step5 = {QString::fromUtf8("Potwierdzenie wizyty"), 
+	Step step6 = {QString::fromUtf8("Potwierdzenie wizyty"), 
 		confirm_label, true};
-	append(step5);
+	append(step6);
 
 	// Last step
 	label_last = new QLabel(QString::fromUtf8("<b>Gratulacje! Wizyta "
@@ -163,6 +185,18 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent) {
 	Step step_last = {QString::fromUtf8("Wizyta zapisana"), label_last,
 		false};
 	append(step_last);
+}
+
+void NewVisit::exec() {
+	bool res;
+	res = database.transaction();
+	if(!res) {
+		// TODO: ERROR
+		qDebug() << "NewVisit: couldn't open transaction";
+		return;
+	}
+
+	Guide::exec();
 }
 
 void NewVisit::patientChanged(int id) {
@@ -178,24 +212,33 @@ void NewVisit::patientChanged(int id) {
 void NewVisit::therapyChanged(int id) {
 	if(id==-1) {
 		setReady(1, false);
-		patient_id = 0;
+		therapy_id = 0;
 	} else {
 		setReady(1, true);
-		patient_id = id;
+		therapy_id = id;
 	}
 }
 
-void NewVisit::goTo(int step) {
+void NewVisit::goTo(const int step) {
 	if(step == 0) {
 		patientList->refill();
+		patientList->selectId(patient_id);
 	} else if(step == 1) {
 		therapyList->setPatient(patient_id);
 		therapyList->refill();
 		if(therapyList->isEmpty()) {
-			if(current<step) goTo(2);
-			else goTo(0);
-
+			newTherapyClicked();
 			return;
+		} else {
+			therapyList->selectId(therapy_id);
+		}
+	} else if(step == steps.count()-1) {
+		visit_id = toDb();
+		if(visit_id>0)
+			success = database.commit();
+		else {
+			database.rollback();
+			qDebug() << "NewVisit::goTo() toDb failed";
 		}
 	}
 
@@ -267,6 +310,60 @@ void NewVisit::controlCh(const QModelIndex &tl, const QModelIndex &) {
 	treat->setHeaderData(row+1, Qt::Horizontal, label);
 }
 
+void NewVisit::reject() {
+	bool res = database.rollback();
+	if(!res) qDebug() << "Rollback failed";
+	Guide::reject();
+}
 
+void NewVisit::newPatientClicked() {
+	PatientForm pf(this);
+	int res = pf.exec();
+
+	if(res==QDialog::Accepted) {
+		patient_id = pf.getPatient();
+		goTo(1);
+	}
+}
+void NewVisit::newTherapyClicked() {
+	therapy_id = database.addTherapy(patient_id);
+	if(therapy_id<=0) {
+		qDebug() << "addTherapy failed";
+		return;
+	}
+
+	goTo(2);
+}
+
+int NewVisit::toDb() {
+	QSqlQuery q(database);
+	q.prepare("SELECT max(number) from visit where therapy_id=?");
+	q.addBindValue(therapy_id);
+	q.exec();
+	q.next();
+
+	int number = q.value(0).toInt();
+	if(number == 0) number = 1;
+
+	q.prepare("INSERT INTO visit (therapy_id, date, place, interview, "
+		"test_res, autotherapy, number) "
+		"VALUES (?, ?, ?, ?, ?, ?, ?)");
+	q.addBindValue(therapy_id);
+	q.addBindValue(date->date());
+	q.addBindValue(city->text());
+	q.addBindValue(interview->toPlainText());
+	q.addBindValue(test_res->toPlainText());
+	q.addBindValue(autotherapy->toPlainText());
+	q.addBindValue(number);
+
+	bool res = q.exec();
+	if(!res) {
+		qDebug() << "NewVisit::toDb() insertion into visit failed";
+		qDebug() << q.lastError();
+		return -1;
+	}
+
+	return q.lastInsertId().toInt();
+}
 
 }

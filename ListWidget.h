@@ -23,14 +23,17 @@ protected:
 public:
 	ListWidget();
 
-	void refill();
 	bool isEmpty();
 
 	void selectFirst();
+	void selectId(int id);
 
 private slots:
 	void selectionChanged(const QItemSelection &current, 
 			const QItemSelection &previous);
+
+public slots:
+	void refill();
 
 protected:
 	virtual QSqlQuery buildQuery() = 0;

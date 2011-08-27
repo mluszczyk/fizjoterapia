@@ -42,7 +42,6 @@ public slots:
 
 	void historyClicked();
 	void modifyClicked();
-
 };
 
 }

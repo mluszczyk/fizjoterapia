@@ -34,6 +34,7 @@ private:
 
 public:
 	PatientForm(QWidget *parent=0, int patient_id=0);
+	int getPatient();
 
 private slots:
 	void clickedCommit();

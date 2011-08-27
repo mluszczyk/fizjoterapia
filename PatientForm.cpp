@@ -27,14 +27,14 @@ PatientForm::PatientForm(QWidget *parent, int _patient_id)
 	sex_layout->addWidget(sex_male);
 	sex_layout->addWidget(sex_female);
 
-	sex_male->setDown(true);
+	sex_male->setChecked(true);
 
 	form->addRow(QString::fromUtf8("Imię:"), name);
 	form->addRow("Nazwisko:", surname);
 	form->addRow("Data urodzenia:", birth);
 	form->addRow(QString::fromUtf8("Płeć:"), sex_layout);
-	form->addRow("Telefon:", phone);
 	form->addRow(QString::fromUtf8("Zawód:"), job);
+	form->addRow("Telefon:", phone);
 	form->addRow("Email:", email);
 
 	fillFields();
@@ -68,11 +68,16 @@ bool PatientForm::commit() {
 	bool res;
 
 	if(patient_id) {
-		res = false;
+		res = database.updatePatient(patient_id,
+			name->text(), surname->text(), birth->date(),
+			sex_female->isChecked(), job->text(),
+			phone->text(), email->text());
 	} else {
-		res = database.addPatient(name->text(), surname->text(), 
-			birth->date(), sex_female->isDown(), phone->text(), 
-			job->text(), email->text());
+		patient_id = database.addPatient(name->text(),
+			surname->text(), 
+			birth->date(), sex_female->isChecked(), 
+			job->text(), phone->text(), email->text());
+		res = (bool)patient_id;
 	}
 
 	if(!res) {
@@ -97,14 +102,18 @@ void PatientForm::fillFields() {
 
 	QSqlQuery q = database.getPatient(patient_id);
 
-	if(!q.next()) return;  // błąd!
-	qDebug() << patient_id;
-
 	name->setText(q.value(0).toString());
 	surname->setText(q.value(1).toString());
-	phone->setText(q.value(4).toString());
-	job->setText(q.value(5).toString());
+	birth->setDate(q.value(2).toDate());
+	if(q.value(3).toBool()) sex_female->setChecked(true);
+	else sex_male->setChecked(true);
+	job->setText(q.value(4).toString());
+	phone->setText(q.value(5).toString());
 	email->setText(q.value(6).toString());
+}
+
+int PatientForm::getPatient() {
+	return patient_id;
 }
 
 }

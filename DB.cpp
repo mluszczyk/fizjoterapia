@@ -8,28 +8,32 @@ namespace Fizjoterapia {
 
 DB database;
 
-DB::DB(const char *_filename) : QSqlDatabase("QSQLITE") {
+DB::DB(const char *_filename, QObject *) : QSqlDatabase("QSQLITE") {
 	setDatabaseName(_filename);
 }
 
-bool DB::addPatient(const QString &name, const QString &surname, 
+int DB::addPatient(const QString &name, const QString &surname, 
 	const QDate &birth, bool sex, 
 	const QString &job, const QString &phone, 
 	const QString &email) {
 	QSqlQuery q(Fizjoterapia::database);
-	q.prepare("INSERT INTO patient (name, surname, birth, sex, phone, "
-		"job, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
+	q.prepare("INSERT INTO patient (name, surname, birth, sex, "
+		"job, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
 	q.addBindValue(name);
 	q.addBindValue(surname);
 	q.addBindValue(birth);
 	q.addBindValue(sex);
-	q.addBindValue(phone);
 	q.addBindValue(job);
+	q.addBindValue(phone);
 	q.addBindValue(email);
 
 	bool res = q.exec();
-
-	return res;
+	if(res) {
+		emit modified();
+		return q.lastInsertId().toInt();
+	} else {
+		return 0;
+	}
 }
 
 QSqlQuery DB::getPatient(int patient_id) {
@@ -42,6 +46,31 @@ QSqlQuery DB::getPatient(int patient_id) {
 	q.next();
 
 	return q;
+}
+
+bool DB::updatePatient(int patient_id, const QString &name, 
+	const QString &surname, 
+	const QDate &birth, bool sex, 
+	const QString &job, const QString &phone, 
+	const QString &email)
+{
+	QSqlQuery q(Fizjoterapia::database);
+	q.prepare("UPDATE patient SET name=?, surname=?, birth=?, "
+		"sex=?, job=?, phone=?, email=? WHERE rowid=?");
+	q.addBindValue(name);
+	q.addBindValue(surname);
+	q.addBindValue(birth);
+	q.addBindValue(sex);
+	q.addBindValue(job);
+	q.addBindValue(phone);
+	q.addBindValue(email);
+	q.addBindValue(patient_id);
+
+	bool res = q.exec();
+
+	if(res) emit modified();
+
+	return res;
 }
 
 QSqlQuery DB::listPatients() {
@@ -65,6 +94,18 @@ QSqlQuery DB::listTherapies(int patient) {
 	q.exec();
 
 	return q;
+}
+
+int DB::addTherapy(int patient_id) {
+	QSqlQuery q(Fizjoterapia::database);
+	
+	q.prepare("INSERT INTO therapy (patient_id) VALUES (?)");
+	q.addBindValue(patient_id);
+
+	bool res = q.exec();
+	if(!res) return -1;
+
+	return q.lastInsertId().toInt();
 }
 
 }

@@ -1,6 +1,6 @@
 CREATE TABLE patient ( name text not null, surname text not null, birth timestamp not null,  sex int not null, phone text null, job text null, email text null);
 CREATE TABLE therapy ( patient_id int, constraint cons_patient foreign key ( patient_id ) references patient ( rowid ) on delete cascade );
-CREATE TABLE visit ( therapy_id int, date timestamp not null, place text not null, number int not null, interview text not null, autotherapy text not null, constraint con_therapy foreign key (therapy_id) references therapy ( rowid ) on delete cascade );
+CREATE TABLE visit ( therapy_id int, date timestamp not null, place text not null, number int not null, interview text not null, test_res text not null, autotherapy text not null, constraint con_therapy foreign key (therapy_id) references therapy ( rowid ) on delete cascade );
 -- TODO: results of additional examination
 CREATE TABLE control ( visit_id int, number int not null, name text not null, constraint con_visit foreign key ( visit_id ) references visit (rowid) on delete cascade );
 CREATE TABLE treatment ( visit_id int, number int not null, name text not null, constraint con_visit foreign key (visit_id) references visit (rowid) on delete cascade );

@@ -16,6 +16,7 @@ ListWidget::ListWidget() {
 	view->setModel(model);
 	view->setSortingEnabled(true);
 	view->verticalHeader()->hide();
+	view->horizontalHeader()->show();
 	view->setSelectionBehavior(QAbstractItemView::SelectRows);
 	view->setSelectionMode(QAbstractItemView::SingleSelection);
 	view->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -28,6 +29,9 @@ ListWidget::ListWidget() {
 
 	// Layout
 	layout->addWidget(view, 1);
+
+	connect((QObject*)&database, SIGNAL(modified()),
+		this, SLOT(refill()));
 }
 
 void ListWidget::refill() {
@@ -45,7 +49,7 @@ void ListWidget::refill() {
 }
 
 void ListWidget::selectionChanged(const QItemSelection &current,
-		const QItemSelection &previous) {
+		const QItemSelection &) {
 	QModelIndexList list = current.indexes();
 	if(list.size()<1) {
 		emit changed(-1);
@@ -62,7 +66,18 @@ bool ListWidget::isEmpty() {
 }
 
 void ListWidget::selectFirst() {
-	view->selectRow(0);
+	view->selectRow(1);
+}
+
+void ListWidget::selectId(int id) {
+	int row = -1;
+	for(int i=0; i<model->rowCount(); ++i) {
+		if(model->data(model->index(i, 0)).toInt() == id) {
+			row = i;
+			break;
+		}
+	}
+	view->selectRow(row);
 }
 
 }
