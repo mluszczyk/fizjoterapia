@@ -10,6 +10,7 @@
 #include <QListView>
 #include <QStringListModel>
 #include <QCloseEvent>
+#include <QStandardItem>
 
 #include "Guide.h"
 #include "PatientList.h"
@@ -54,6 +55,8 @@ private:
 	QWidget *treat_buttons_wrap;
 	QHBoxLayout *treat_buttons;
 	QStandardItemModel *treat;
+	TreatDelegate *treat_delegate;
+	ResDelegate *res_delegate;
 	QTableView *treat_view;
 	QPushButton *treat_add;
 	QPushButton *treat_del;

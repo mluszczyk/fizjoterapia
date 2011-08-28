@@ -3,8 +3,10 @@
 #include <QDebug>
 #include <QModelIndex>
 #include <QItemSelection>
+
 #include "PatientList.h"
 #include "DB.h"
+#include "Delegates.h"
 
 namespace Fizjoterapia {
 
@@ -24,6 +26,8 @@ void PatientList::prepareHeaders() {
 	model->setHeaderData(6, Qt::Horizontal, "Ostatnia wizyta");
 
 	view->setColumnHidden(0, true);
+	view->setItemDelegateForColumn(3, &delegate);
+
 	view->resizeColumnsToContents();
 }
 

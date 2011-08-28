@@ -1,5 +1,7 @@
 #include <QPushButton>
 #include <QDebug>
+
+#include "PickBirthDate.h"
 #include "PatientForm.h"
 #include "DB.h"
 
@@ -13,7 +15,7 @@ PatientForm::PatientForm(QWidget *parent, int _patient_id)
 	form = new QFormLayout(wrap);
 	name = new QLineEdit;
 	surname = new QLineEdit;
-	birth = new QDateEdit;
+	birth = new PickBirthDate;
 	sex_group = new QButtonGroup;
 	sex_layout = new QVBoxLayout();
 	   	sex_male = new QRadioButton(QString::fromUtf8("Mężczyzna"));

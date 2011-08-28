@@ -9,6 +9,7 @@
 #include <QLabel>
 
 #include "Decorated.h"
+#include "PickBirthDate.h"
 
 namespace Fizjoterapia {
 
@@ -23,7 +24,7 @@ private:
 	QWidget *wrap;
 	QLineEdit *name;
 	QLineEdit *surname;
-	QDateEdit *birth;
+	PickBirthDate *birth;
 	QVBoxLayout *sex_layout;
 	QButtonGroup *sex_group;
 	QRadioButton *sex_male;
