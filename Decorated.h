@@ -28,8 +28,8 @@ public:
 
 	void setTitle(const QString &title);
 
-	void setContent(QWidget *layout);
-	void addControl(QWidget* control);
+	void setContent(QWidget *);
+	void addControl(QWidget *control);
 
 };
 

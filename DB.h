@@ -7,6 +7,7 @@
 #include <QString>
 #include <QObject>
 #include "config.h"
+#include "Export.h"
 
 namespace Fizjoterapia {
 
@@ -29,8 +30,14 @@ public:
 
 	QSqlQuery listPatients();
 	QSqlQuery listTherapies(int patient=-1);
+	QSqlQuery listVisitsOfPatient(int patient);
+
+	bool fillVisit(int visit_id, Visit& visit);
 
 	int addTherapy(int patient_id);
+
+	int saveNewVisit(int therapy_id, Visit&);
+	int getVisitNumber(int visit_id);
 
 signals:
 	void modified();

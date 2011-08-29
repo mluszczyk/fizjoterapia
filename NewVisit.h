@@ -15,6 +15,7 @@
 #include "Guide.h"
 #include "PatientList.h"
 #include "TherapyList.h"
+#include "Export.h"
 
 namespace Fizjoterapia {
 
@@ -70,13 +71,22 @@ private:
 
 	QLabel *confirm_label;
 
+	QVBoxLayout *lay_last;
+	QPushButton *print_visit;
+	QPushButton *export_visit;
+	QPushButton *print_auto;
+	QPushButton *export_auto;
+	QPushButton *send_auto;
 	QLabel *label_last;
+	QWidget *wid_last;
 
 	int patient_id;
 	int therapy_id;
 	int visit_id;
 
 	bool success;
+
+	Visit visit;
 
 public:
 	NewVisit(QDialog *parent);

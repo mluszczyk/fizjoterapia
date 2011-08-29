@@ -182,10 +182,24 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent),
 	append(step6);
 
 	// Last step
+	wid_last = new QWidget;
+	lay_last = new QVBoxLayout(wid_last);
 	label_last = new QLabel(QString::fromUtf8("<b>Gratulacje! Wizyta "
 		"została zapisana!</b><br/><br/> "
 		"Możesz już bezpiecznie zamknąć to okno. "
 		"Możesz też wybrać jedną z poniższych opcji:"));
+	print_visit = new QPushButton("Drukuj raport");
+	export_visit = new QPushButton("Raport w formie PDF");
+	print_auto = new QPushButton("Drukuj autoterapię");
+	export_auto = new QPushButton("Autoterapia w formie PDF");
+	send_auto = new QPushButton("Wyślij autoterapię");
+
+	lay_last->addWidget(label_last);
+	lay_last->addWidget(print_visit);
+	lay_last->addWidget(export_visit);
+	lay_last->addWidget(print_auto);
+	lay_last->addWidget(export_auto);
+	lay_last->addWidget(send_auto);
 
 	Step step_last = {QString::fromUtf8("Wizyta zapisana"), label_last,
 		false};
@@ -347,118 +361,29 @@ void NewVisit::newTherapyClicked() {
 }
 
 int NewVisit::toDb() {
-	// Getting number
-	QSqlQuery q(database);
-	q.prepare("SELECT max(number) from visit where therapy_id=?");
-	q.addBindValue(therapy_id);
-	q.exec();
-	q.next();
+	visit.date = date->date();
+	visit.place = city->text();
+	visit.interview = interview->toPlainText();
+	visit.test_res = test_res->toPlainText();
+	visit.autotherapy = autotherapy->toPlainText();
 
-	int number = q.value(0).toInt();
-	if(number == 0) number = 1;
+	visit.controls.clear();
+	visit.treatments.clear();
+	visit.results.clear();
 
-	// Inserting base
-	q.prepare("INSERT INTO visit (therapy_id, date, place, interview, "
-		"test_res, autotherapy, number) "
-		"VALUES (?, ?, ?, ?, ?, ?, ?)");
-	q.addBindValue(therapy_id);
-	q.addBindValue(date->date());
-	q.addBindValue(city->text());
-	q.addBindValue(interview->toPlainText());
-	q.addBindValue(test_res->toPlainText());
-	q.addBindValue(autotherapy->toPlainText());
-	q.addBindValue(number);
-
-	bool res = q.exec();
-	if(!res) {
-		qDebug() << "NewVisit::toDb() insertion into visit failed";
-		qDebug() << q.lastError();
-		return -1;
-	}
-
-	visit_id = q.lastInsertId().toInt();
-
-	// Inserting control tests and treatment names
-	QList<int> control_ids, treat_ids;
-	for(int i=0; i<control->rowCount(); ++i) {
-		q.prepare("INSERT INTO control (visit_id, number, name) "
-				"values (?, ?, ?)");
-		q.addBindValue(visit_id);
-		q.addBindValue(i);
-		q.addBindValue(control->index(i).data());
-
-		res = q.exec();
-		if(!res) {
-			qDebug() << "NewVisit::toDb() insertion "
-				"into control failed";
-			qDebug() << q.lastError();
-			return -1;
-		}
-
-		control_ids.append(q.lastInsertId().toInt());
-	}
-
+	for(int i=0; i<control->rowCount(); ++i)
+		visit.controls.append(control->index(i).data().toString());
 	for(int i=0; i<treat->rowCount(); ++i) {
-		q.prepare("INSERT INTO treatment (visit_id, number, name) "
-				"values (?, ?, ?)");
-		q.addBindValue(visit_id);
-		q.addBindValue(i);
-		q.addBindValue(treat->index(i, 0).data());
-
-		res = q.exec();
-		if(!res) {
-			qDebug() << "NewVisit::toDb() insertion "
-				"into treatment failed";
-			qDebug() << q.lastError();
-			return -1;
-		}
-
-		treat_ids.append(q.lastInsertId().toInt());
+		visit.treatments.append(treat->index(i,0).data().toString());
+		visit.results.append(QList<int>());
+		QList<int> &list = visit.results.last();
+		for(int j=0; j<control->rowCount(); ++j)
+			list.append(treat->index(i, j+1).data().toInt());
 	}
 
-	/*
-	q.prepare("INSERT INTO control_result (control_id, treatment_id, "
-			"result) VALUES (?, ?, ?)");
+	visit_id = database.saveNewVisit(therapy_id, visit);
 
-	QVariantList bind_cids, bind_tids, bind_res;
-
-	for(int i=0; i<treat->rowCount(); ++i) {
-		for(int j=0; j<treat->columnCount()-1; ++j) {
-			bind_tids.append(treat_ids[i]);
-			bind_cids.append(control_ids[j]);
-			bind_res.append(treat->index(i, j+1).data().toInt());
-		}
-	}
-
-	if(!q.execBatch()) {
-		qDebug() << q.lastError();
-		qDebug() << "NewVisit::toDb() insertion into res failed";
-		return -1;
-	}*/
-
-
-	q.prepare("INSERT INTO control_result (control_id, treatment_id, "
-			"result) VALUES (?, ?, ?)");
-
-	QVariantList bind_cids, bind_tids, bind_res;
-
-	for(int i=0; i<treat->rowCount(); ++i) {
-		for(int j=0; j<treat->columnCount()-1; ++j) {
-			bind_tids.append(treat_ids[i]);
-			bind_cids.append(control_ids[j]);
-			bind_res.append(treat->index(i, j+1).data().toInt());
-		}
-	}
-
-	q.addBindValue(bind_cids);
-	q.addBindValue(bind_tids);
-	q.addBindValue(bind_res);
-
-	if(!q.execBatch()) {
-		qDebug() << q.lastError();
-		qDebug() << "NewVisit::toDb() insertion into res failed";
-		return -1;
-	}
+	visit.number = database.getVisitNumber(visit_id);
 
 	return visit_id;
 }

@@ -4,6 +4,7 @@
 #include "DB.h"
 #include "PatientInfo.h"
 #include "PatientForm.h"
+#include "BrowseHistory.h"
 
 namespace Fizjoterapia {
 
@@ -73,6 +74,9 @@ QSize PatientInfo::sizeHint() const {
 }
 
 void PatientInfo::historyClicked() {
+	BrowseHistory form(patient, this);
+	form.refill();
+	form.exec();
 }
 
 void PatientInfo::modifyClicked() {
