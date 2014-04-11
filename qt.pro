@@ -7,7 +7,7 @@ TARGET = fizjoterapia
 DEPENDPATH += .
 INCLUDEPATH += . 
 
-QT += sql
+QT += widgets sql
 
 # Input
 HEADERS += config.h MainWindow.h PatientForm.h Decorated.h DB.h NewVisit.h Guide.h PatientList.h ListWidget.h TherapyList.h PatientInfo.h BrowsePatients.h PickBirthDate.h Delegates.h BrowseHistory.h VisitInfo.h TherapiesTree.h Export.h

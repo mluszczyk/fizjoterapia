@@ -1,0 +1,5 @@
+Fizjoterapia is a simple application designed for physiotherapists, that keeps a database of patients and their visits.
+
+It is a result of a project which I had been making together with an physiotherapist and which is currently postponed.
+
+It depends on Qt5.

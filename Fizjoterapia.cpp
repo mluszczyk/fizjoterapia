@@ -1,5 +1,5 @@
 #include <iostream>
-#include <QtGui>
+#include <QtWidgets>
 #include "MainWindow.h"
 #include "DB.h"
 

@@ -206,16 +206,16 @@ NewVisit::NewVisit(QDialog *parent) : Guide(parent),
 	append(step_last);
 }
 
-void NewVisit::exec() {
+int NewVisit::exec() {
 	bool res;
 	res = database.transaction();
 	if(!res) {
 		// TODO: ERROR
 		qDebug() << "NewVisit: couldn't open transaction";
-		return;
+		return QDialog::Rejected;
 	}
 
-	Guide::exec();
+	return Guide::exec();
 }
 
 void NewVisit::patientChanged(int id) {

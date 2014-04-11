@@ -92,7 +92,7 @@ public:
 	NewVisit(QDialog *parent);
 
 	virtual void goTo(int step);
-	virtual void exec();
+	virtual int exec();
 
 private:
 	int toDb();
